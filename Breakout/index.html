@@ -1,0 +1,182 @@
+<html>
+<head>
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+<canvas width="480" height="320">
+</canvas>
+<script>
+
+ var canvas = document.querySelector("canvas");
+ var ctx = canvas.getContext("2d");
+ var ballRadius=10;
+ var x=200;
+ var y=200;
+ var dx=2,dy=2;
+ var paddleHeight=10;
+ var paddleWidth=75;
+ var paddleX=(canvas.width-paddleWidth)/2
+ var rightPressed=false,leftPressed=false;
+ var brickRowCount=3
+ var brickColumnCount=5
+ var brickWidth=75
+ var brickHeight=20
+ var brickPadding=20
+ var brickOffSetTop=30
+ var brickOffSetLeft=10;
+ var bricks=[]
+ var score=0
+ for(var c=0;c<brickColumnCount;c++)
+ {
+	 bricks[c]=[]
+	for(var r=0;r<brickRowCount;r++)
+		{
+			bricks[c][r]={x:0,y:0,status:true}		//intializing the brick field and setting sets all bricks to be not collided(status=1)
+		}
+}
+
+ 
+ document.addEventListener("keydown",keyDownHandler,false)
+ document.addEventListener("keyup",keyUpHandler,false)
+ document.addEventListener("mousemove",mouseMoveHandler,false)
+ function keyDownHandler(e){         //handles key down event 
+		if(e.keyCode==39)
+			rightPressed=true
+		else if(e.keyCode==37)
+			leftPressed=true
+}
+
+function keyUpHandler(e){		//handles the key up event
+		if(e.keyCode==39)
+			rightPressed=false
+		else if(e.keyCode==37)
+			leftPressed=false
+}
+function mouseMoveHandler(e){					//handles mouse movements
+	var relativeX=e.clientX-canvas.offsetLeft		//calculates x position of mouse relative to the canvas
+	if(relativeX>0 && relativeX<canvas.width)		//checks if the x positon is in the canvas element
+		paddleX=relativeX-paddleWidth/2				//changes the x positon of paddle with respect to mid point of paddle
+}
+function drawBricks(){									//draws the brick field
+			for(var c=0;c<brickColumnCount;c++)
+			{
+				for(var r=0;r<brickRowCount;r++)
+				{
+					if(bricks[c][r].status)				//checks if the brick has been collided before
+					{
+						var brickX=(c*(brickWidth+brickPadding))+brickOffSetLeft;	//calculates the coordiantes of bricks
+						var brickY=(r*(brickHeight+brickPadding))+brickOffSetTop;
+						bricks[c][r].x=brickX
+						bricks[c][r].y=brickY
+						ctx.beginPath()
+						ctx.rect(brickX,brickY,brickWidth,brickHeight)
+						ctx.fillStyle="black"
+						ctx.fill()
+						ctx.closePath()
+					}
+				}
+			}
+	}
+ function draw(){			//draws the ball
+		ctx.beginPath()
+		ctx.arc(x,y,ballRadius,0,2*Math.PI)
+		ctx.fillStyle="black"
+		ctx.fill()
+		ctx.closePath()
+		
+}
+function drawBall(){							//draws all the entites like ball,paddle,and bricks 
+		checkCollision()
+		brickCollisionDetection()
+		ctx.clearRect(0,0,canvas.width,canvas.height)
+		drawBricks()
+		draw()
+		drawScore()
+		drawPaddle()
+		side1()
+		side2()
+		x+=dx				//for changing x and y values of ball every frame depending on speed dx and dy and direction
+		y+=dy
+		requestAnimationFrame(drawBall) //Similar to setInterval but neat
+}
+function drawPaddle(){
+	
+		ctx.beginPath()
+		ctx.rect(paddleX,canvas.height-paddleHeight,paddleWidth,paddleHeight)
+		ctx.fillStyle="black"
+		ctx.fill()
+		ctx.closePath()
+}
+function brickCollisionDetection(){
+	for(var c=0;c<brickColumnCount;c++)
+	{
+		for(var r=0;r<brickRowCount;r++)
+		{
+			var b=bricks[c][r]
+			if(bricks[c][r].status)
+			{
+				if(x > b.x-ballRadius&& x < (b.x+brickWidth + ballRadius) && y > (b.y-ballRadius)&& y<(b.y+brickHeight+ballRadius))
+					{ 
+						score++
+						dy=-dy
+						bricks[c][r].status=false
+						if(score==brickRowCount*brickColumnCount)
+						{
+							alert("YOu win")
+							document.location.reload()
+						}
+					}
+			}
+		}
+	}
+}
+function side1(){
+	ctx.beginPath()
+	ctx.arc(paddleX,canvas.height,10,0,2*3.14)
+	ctx.fillStyle="black"
+	ctx.fill()
+	ctx.closePath()
+}
+function side2(){
+	ctx.beginPath()
+	ctx.arc(paddleX+paddleWidth,canvas.height,10,0,2*3.14)
+	ctx.fillStyle="black"
+	ctx.fill()
+	ctx.closePath()
+}
+function drawScore(){
+		ctx.font="16px Arial"
+		ctx.fillStyle="black"
+		ctx.fillText(score,(canvas.width/2)-7,20)
+		ctx.beginPath()
+		ctx.rect((canvas.width/2)-20,0,40,25)
+		ctx.strokeStyle="black"
+		ctx.stroke()
+		ctx.closePath()
+}
+function checkCollision(){
+		if(x<ballRadius|| x>canvas.width-ballRadius)
+			dx=-dx
+		if(y<ballRadius)
+			dy=-dy
+		else if(y >= canvas.height-ballRadius)
+			{
+				if(x > paddleX-5 && x <(paddleX+paddleWidth+5))
+				{
+						dy=-dy
+				}		
+				else{
+						alert("Game over")
+						document.location.reload()
+				}
+		}
+
+		if(rightPressed && paddleX < canvas.width-paddleWidth)
+			paddleX+=7
+		else if(leftPressed && paddleX>0)
+			paddleX-=7
+}	
+drawBall()
+</script>
+</body>
+</html>
