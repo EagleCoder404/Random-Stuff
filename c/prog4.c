@@ -9,11 +9,9 @@ int main()
 	printf("Enter the alphanumeric string\n");
 	scanf("%s",string);
 
-	while(string[i]!='\0')
-	{
+	while(string[i++]!='\0')
 		if(isdigit(string[i]))
 			n++;
-		i++;
-	}
+
 	printf("\n%d",n);
 }

@@ -27,6 +27,4 @@ int main()
 	printf("The answer is\n");
 	for(i=0;i<n1;i++)
 		printf("%d ",ans[i]);
-
-
 }
